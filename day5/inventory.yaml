@@ -1,0 +1,19 @@
+all: 
+  vars:
+    ansible_ssh_private_key_file: test.pem
+    ansible_user: ec2-user
+  hosts: #ungrouped
+
+  children:
+    webservers:
+      hosts:
+        web1: 
+          ansible_host: 172.31.29.132
+        web2: 
+          ansible_host: 172.31.20.51
+
+    db: # Second group of hosts
+     hosts:
+       dbcentos:
+         ansible_host: 172.31.17.208
+         ansible_user: ec2-user

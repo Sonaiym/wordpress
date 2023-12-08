@@ -1,0 +1,21 @@
+---
+- name: adding users
+  hosts: db
+  become: yes
+  #vars:
+   # user: local
+  #  comment: adding from local host
+  tasks: 
+    - name: create user
+      user:
+        name: "{{ name }}"
+        state: present
+        comment: "{{ comm }}"
+      register: userout
+
+    - name: print output of user name
+      debug: 
+        var: userout.name
+    - name: print output of user name
+      debug: 
+        var: userout.comment

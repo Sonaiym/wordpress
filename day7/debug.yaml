@@ -1,0 +1,7 @@
+---
+- name: debug info about distribution
+  hosts: all 
+  tasks:
+    - name: getting os
+      debug:
+        var: ansible_distribution

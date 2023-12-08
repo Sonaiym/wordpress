@@ -1,0 +1,47 @@
+---
+- name: Install Apache
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Download and Install Apache
+      yum: 
+        name: httpd
+        state: present
+    - name: Start and enable Apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: copy index.html file to servers
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+        owner: apache
+        group: apache
+        mode: '0644'
+    - name: Download and Install Apache
+      yum: 
+        name: "{{ item }}"
+        state: present
+      loop:
+       - wget
+       - zip
+       - unzip
+       - git
+    - name: Ensure group "developers" exists
+      group:
+        name: developers
+        state: present
+    - name: create users from list
+      user:
+        name: "{{ item }}"
+        comment: adding users from list
+        groups: developers
+      loop:
+        - user1
+        - user2
+        - user3
+      register: users
+    - name: output of user module
+      debug:
+        var: users.results[0].invocation.module_args.name

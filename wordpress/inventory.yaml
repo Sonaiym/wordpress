@@ -1,0 +1,9 @@
+all: 
+  vars:
+    ansible_ssh_private_key_file: test.pem
+    ansible_user: ec2-user
+  hosts: #ungrouped
+    front:
+      ansible_host: 172.31.30.145
+    back: 
+      ansible_host: 172.31.18.129

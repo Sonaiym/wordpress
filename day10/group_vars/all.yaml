@@ -1,0 +1,7 @@
+users:
+  - name: sona
+    state: present
+  - name: nur
+    state: present
+  - name: kani
+    state: present

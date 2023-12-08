@@ -1,0 +1,31 @@
+---
+- name: Install Apache
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Download and Install Apache
+      yum: 
+        name: httpd
+        state: present
+    - name: Start and enable Apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: copy index.html file to servers
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+        owner: apache
+        group: apache
+        mode: '0644'
+
+- name: Install MySQL
+  hosts: dbcentos
+  become: true
+  tasks:
+    - name: Install MySQL
+      dnf: 
+        name: mariadb-server
+        state: present
+    

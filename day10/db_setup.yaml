@@ -1,0 +1,89 @@
+- name: Install MySQL
+  hosts: db
+  vars_files:
+    #- vars/users.yaml
+    - vars/packs.yaml
+  become: True
+  tasks:
+    - name: Install Mariadb on RedHat
+      dnf:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+      when: ansible_distribution == "RedHat"
+      with_items: "{{ packs }}"
+
+    - name: Install Mariadb on Ubuntu
+      apt:
+        update_cache: yes
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+      when: ansible_distribution == "Ubuntu"
+      with_items: "{{ packs }}"
+
+    - name: Start and Enable MariaDB
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: Install PyMysql RedHat
+      dnf:
+        name: python3-PyMySQL.noarch 
+        state: present
+      when: ansible_distribution == "RedHat"
+
+    - name: Install PyMysql on Ubuntu
+      apt:
+        name: python3-pymysql 
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Create database on mariadb "RedHat"
+      mysql_db:
+        name: testDB
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+      when: ansible_distribution == "RedHat"
+
+    - name: Create database on mariadb "Ubuntu"
+      mysql_db:
+        name: testDB
+        state: present
+        login_unix_socket: /run/mysqld/mysqld.sock 
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Create database user with name 'sona' and password '1234' with all database privileges on "RedHat"
+      community.mysql.mysql_user:
+        name: sona
+        password: 1234
+        priv: '*.*:ALL'
+        state: present
+        column_case_sensitive: false
+        login_unix_socket: /var/lib/mysql/mysql.sock
+      when: ansible_distribution == "RedHat"
+
+    - name: Create database user with name 'sona' and password '1234' with all database privileges on "RedHat"
+      community.mysql.mysql_user:
+        name: sona
+        password: 1234
+        priv: '*.*:ALL'
+        state: present
+        column_case_sensitive: false
+        login_unix_socket: /run/mysqld/mysqld.sock  
+      when: ansible_distribution == "Ubuntu"    
+
+    - name: Ensure group "engineers" exists
+      group:
+        name: engineers
+        state: present  
+    - name: create users from file
+      user:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+        comment: adding users from file
+        groups: engineers
+      with_items: "{{ users }}"
+     # loop:
+      #  - user1
+       # - user2
+        #- user3
+      # register: users  

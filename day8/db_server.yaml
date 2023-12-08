@@ -1,0 +1,30 @@
+- name: Install MySQL
+  hosts: dbcentos
+  become: True
+  tasks:
+    - name: Install Mariadb
+      dnf:
+        name: mariadb-server
+        state: present
+    - name: Start and Enable MariaDB
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: Install PyMysql
+      dnf:
+        name: python3-PyMySQL.noarch 
+        state: present
+    - name: Create database on mariadb
+      mysql_db:
+        name: testDB
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+    - name: Create database user with name 'sona' and password '1234' with all database privileges
+      community.mysql.mysql_user:
+        name: sona
+        password: 1234
+        priv: '*.*:ALL'
+        state: present
+        column_case_sensitive: false
+        login_unix_socket: /var/lib/mysql/mysql.sock

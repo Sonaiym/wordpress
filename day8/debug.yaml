@@ -1,0 +1,10 @@
+---
+- name: debug info about mounts
+  hosts: dbcentos
+  tasks:
+    - name: ansible_selinux
+      debug: ansible_selinux
+       var: ansible_selinux.status
+    - name: mount info
+      debug: 
+       var: ansible_mounts[0].block_available  
