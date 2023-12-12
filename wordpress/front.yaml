@@ -1,33 +1,33 @@
 ---
-- name: Install Apache
+- name: Install Apache and MySQL for WordPress
   hosts: front
   become: true
+  vars:
+    wordpress_version: "6.0.2"  
+    wordpress_install_directory: "/var/www/html"  
+    wordpress_directory: "{{ wordpress_install_directory }}/wordpress"
+
   tasks:
-    - name: Download and Install Apache
-      yum: 
+    - name: Install Apache
+      yum:
         name: httpd
         state: present
+
     - name: Start and enable Apache
       service:
         name: httpd
-        state: started
+        state: restarted
         enabled: yes
-    - name: Download and Install Apache
-      yum: 
-        name: "{{ item }}"
-        state: present
-      loop:
-       - wget
-       - zip
-       - unzip
-       - git
-- name: Install MySQL
+
+- name: Install MySQL and WordPress Prerequisites
   hosts: front
+  become: true
   vars_files:
     - vars/packs.yaml
-  become: True
+    - vars/default.yaml
+
   tasks:
-    - name: Install Mariadb on RedHat
+    - name: Install MariaDB on RedHat
       dnf:
         name: "{{ item.name }}"
         state: "{{ item.state }}"
@@ -39,38 +39,30 @@
         name: mariadb
         state: started
         enabled: yes
-    - name: Install PyMysql RedHat
+
+    - name: Install PyMySQL for RedHat
       dnf:
         name: python3-PyMySQL.noarch 
         state: present
       when: ansible_distribution == "RedHat"
-    - name: Install Wordpress Prerequisites
+
+    - name: Install WordPress Prerequisites
       package:
         name: "{{ wordpress_packages }}"
         state: present
       tags: wordpress
 
-    - name: Download Wordpress
+    - name: Download WordPress
       get_url:
         url: https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz
-        dest: "{{ wordpress_install_directory }}"
-      changed_when: false
+        dest: "{{ wordpress_install_directory }}/wordpress-{{ wordpress_version }}.tar.gz"
       tags: wordpress
 
-    - name: Unzipping wordpress
+    - name: Unzipping WordPress
       unarchive:
         src: "{{ wordpress_install_directory }}/wordpress-{{ wordpress_version }}.tar.gz"
         dest: "{{ wordpress_install_directory }}"
         remote_src: true
-        owner: root
+        owner: apache
         group: apache
-        setype: httpd_sys_rw_content_t
-        creates: "{{ wordpress_directory }}"
-      tags: wordpress
-
-    - name: Remove wordpress.tar.gz file
-      file:
-        path: "{{ wordpress_install_directory }}/wordpress-{{ wordpress_version }}.tar.gz"
-        state: absent
-      changed_when: false
       tags: wordpress
